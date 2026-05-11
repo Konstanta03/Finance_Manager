@@ -1,0 +1,41 @@
+@model FinanceManager2._0.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Реєстрація";
+}
+
+<div class="auth-card mx-auto">
+    <h2>📝 Реєстрація</h2>
+    <p class="text-muted">Створіть акаунт для роботи з фінансами.</p>
+
+    <form asp-controller="User" asp-action="Register" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" autocomplete="email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Пароль</label>
+            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+            <div class="form-text">Мінімум 6 символів, велика літера і цифра. Наприклад: Test123</div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ConfirmPassword" class="form-label">Повторіть пароль</label>
+            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Зареєструватися</button>
+    </form>
+
+    <div class="mt-3 text-center">
+        <a asp-controller="User" asp-action="Login">У мене вже є акаунт</a>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

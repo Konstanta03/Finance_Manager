@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="row align-items-center py-5">
+    <div class="col-lg-7">
+        <h1 class="display-4 fw-bold mb-3">Finance Manager</h1>
+        <p class="lead mb-4">
+            Веб-система для обліку доходів, витрат, категорій, регулярних платежів та перегляду статистики.
+        </p>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Transactions" asp-action="Index" class="btn btn-success btn-lg me-2">Перейти до транзакцій</a>
+            <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-light btn-lg">Категорії</a>
+        }
+        else
+        {
+            <a asp-controller="User" asp-action="Login" class="btn btn-primary btn-lg me-2">Увійти</a>
+            <a asp-controller="User" asp-action="Register" class="btn btn-outline-light btn-lg">Зареєструватися</a>
+        }
+    </div>
+
+    <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card-custom">
+            <h4>Що реалізовано</h4>
+            <ul class="mb-0">
+                <li>Авторизація та ролі користувачів</li>
+                <li>Додавання, редагування і видалення транзакцій</li>
+                <li>Категорії доходів і витрат</li>
+                <li>Регулярні платежі</li>
+                <li>Фільтрація, сортування та статистика</li>
+                <li>Підключення до PostgreSQL</li>
+            </ul>
+        </div>
+    </div>
+</div>

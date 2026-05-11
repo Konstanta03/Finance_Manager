@@ -1,0 +1,42 @@
+@model IEnumerable<FinanceManager2._0.Models.Transaction>
+
+<h2>💰 Транзакції</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">➕ Додати транзакцію</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Категорія</th>
+            <th>Дата</th>
+            <th>Сума</th>
+            <th>Нотатка</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Category?.Name</td>
+                    <td>@t.Date.ToLocalTime().ToShortDateString()</td>
+                    <td style="color:@(t.Amount < 0 ? "red" : "green")">@t.Amount</td>
+                    <td>@t.Note</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-warning btn-sm">✏</a>
+                        <form asp-action="DeleteConfirmed" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@t.Id" />
+                            <button class="btn btn-danger btn-sm" onclick="return confirm('Видалити транзакцію?')">🗑</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-muted">Транзакцій ще немає.</td></tr>
+        }
+    </tbody>
+</table>

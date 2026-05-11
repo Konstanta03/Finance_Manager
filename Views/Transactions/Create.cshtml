@@ -1,0 +1,34 @@
+@model FinanceManager2._0.Models.Transaction
+@{
+    ViewData["Title"] = "Нова транзакція";
+}
+<h2>➕ Нова транзакція</h2>
+@if (TempData["Warning"] != null) { <div class="alert alert-warning">@TempData["Warning"]</div> }
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+<form asp-controller="Transactions" asp-action="Create" method="post" class="card-custom">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Категорія</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="@(ViewData["CategoryId"] as SelectList)">
+            <option value="">-- Оберіть категорію --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">Сума</label>
+        <input asp-for="Amount" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label">Дата</label>
+        <input asp-for="Date" type="date" class="form-control" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Note" class="form-label">Нотатка</label>
+        <input asp-for="Note" class="form-control" placeholder="Наприклад: обід, проїзд, зарплата" />
+    </div>
+    <button type="submit" class="btn btn-success">💾 Зберегти</button>
+    <a asp-controller="Transactions" asp-action="Index" class="btn btn-secondary">⬅ Назад</a>
+</form>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

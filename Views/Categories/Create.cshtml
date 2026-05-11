@@ -1,0 +1,26 @@
+﻿@model FinanceManager2._0.Models.Category
+
+@{
+    ViewData["Title"] = "Додати категорію";
+}
+
+<h2>➕ Додати категорію</h2>
+
+<form asp-action="Create" method="post" class="card-custom">
+
+    <div class="mb-3">
+        <label class="form-label">Назва</label>
+        <input asp-for="Name" class="form-control" placeholder="Наприклад: Їжа" />
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="IsExpense" class="form-check-input" />
+        <label class="form-check-label">
+            Це витрати?
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">💾 Зберегти</button>
+    <a asp-action="Index" class="btn btn-secondary">⬅ Назад</a>
+
+</form>

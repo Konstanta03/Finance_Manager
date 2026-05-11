@@ -1,0 +1,157 @@
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --danger: #dc2626;
+    --success: #16a34a;
+}
+
+html {
+    font-size: 15px;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html { font-size: 16px; }
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body.theme-light {
+    --bg: #f4f7fb;
+    --surface: #ffffff;
+    --text: #111827;
+    --muted: #667085;
+    --border: #d0d7e2;
+    --table-head: #eaf0ff;
+    --row-hover: #f8fafc;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+body.theme-dark {
+    --bg: #1e1e2f;
+    --surface: #2b2b44;
+    --text: #ffffff;
+    --muted: #cbd5e1;
+    --border: rgba(255,255,255,.22);
+    --table-head: rgba(255,255,255,.10);
+    --row-hover: rgba(255,255,255,.08);
+    background: linear-gradient(135deg, #1e1e2f, #2e2e48) !important;
+    color: var(--text) !important;
+}
+
+body, body main, body .container, body p, body span, body li, body label,
+body h1, body h2, body h3, body h4, body h5, body h6,
+body td, body th, body div:not(.btn):not(.alert):not(.badge) {
+    color: var(--text) !important;
+}
+
+.text-muted, .form-text { color: var(--muted) !important; }
+.text-danger { color: #ef4444 !important; }
+
+.app-container { padding-top: 28px; padding-bottom: 80px; }
+
+.app-navbar {
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.04);
+}
+
+.navbar a, .navbar-brand, .nav-link { color: var(--text) !important; }
+.navbar a:hover { color: var(--primary) !important; }
+
+.card, .card-custom, .theme-panel, .auth-card, form.card-custom {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 8px 20px rgba(15,23,42,.06);
+}
+
+.auth-card { max-width: 460px; margin-top: 40px; }
+
+.table, table {
+    width: 100%;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+thead, tbody, tr, th, td {
+    color: var(--text) !important;
+    background-color: transparent !important;
+}
+
+.table > :not(caption) > * > *, table th, table td {
+    color: var(--text) !important;
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 12px !important;
+    vertical-align: middle !important;
+}
+
+.table thead th, table thead th, th {
+    background: var(--table-head) !important;
+    font-weight: 700 !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-accent-bg: transparent !important;
+    color: var(--text) !important;
+}
+
+tr:hover, .table-hover tbody tr:hover td { background: var(--row-hover) !important; }
+
+input, select, textarea, option, .form-control, .form-select {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+}
+
+input::placeholder, textarea::placeholder { color: #6b7280 !important; }
+.form-check-input { border: 1px solid #94a3b8 !important; }
+
+.btn { border-radius: 9px !important; font-weight: 600; }
+.btn-primary { background: var(--primary) !important; border-color: var(--primary) !important; color: #fff !important; }
+.btn-primary:hover { background: var(--primary-dark) !important; }
+.btn-success, .btn-danger, .btn-warning, .btn-info, .btn-secondary { color: #fff !important; }
+.btn-warning { color: #111827 !important; }
+
+a:not(.btn) { color: var(--primary) !important; font-weight: 500; }
+body.theme-dark a:not(.btn) { color: #93c5fd !important; }
+
+.toast-success, .toast-warning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    color: white !important;
+    z-index: 9999;
+    animation: fadeOut 4s forwards;
+}
+.toast-success { background: var(--success); }
+.toast-warning { background: #f59e0b; color: #111827 !important; }
+
+.footer {
+    border-top: 1px solid var(--border);
+    padding: 18px 0;
+    color: var(--muted) !important;
+}
+.footer * { color: var(--muted) !important; }
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
