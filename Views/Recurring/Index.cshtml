@@ -1,0 +1,41 @@
+@model IEnumerable<FinanceManager2._0.Models.RecurringPayment>
+@{
+    ViewData["Title"] = "Планувальник платежів";
+}
+<h2>🗓 Планувальник платежів</h2>
+<p class="text-muted">Налаштування регулярних транзакцій.</p>
+<a asp-controller="Recurring" asp-action="Create" class="btn btn-success mb-3">➕ Додати регулярний платіж</a>
+<a asp-controller="Transactions" asp-action="Index" class="btn btn-secondary mb-3">⬅ До транзакцій</a>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr><th>Назва</th><th>Сума</th><th>Категорія</th><th>Дата початку</th><th>Періодичність</th><th>Статус</th><th>Дії</th></tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Name</td>
+                    <td>@r.Amount</td>
+                    <td>@r.Category?.Name</td>
+                    <td>@r.StartDate.ToLocalTime().ToShortDateString()</td>
+                    <td>@r.Frequency</td>
+                    <td>@(r.IsActive ? "Активний" : "Вимкнений")</td>
+                    <td>
+                        <a asp-controller="Recurring" asp-action="Edit" asp-route-id="@r.Id" class="btn btn-sm btn-warning">✏</a>
+                        <form asp-controller="Recurring" asp-action="DeleteConfirmed" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Видалити регулярний платіж?')">🗑</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="7" class="text-muted">Регулярних платежів ще немає.</td></tr>
+        }
+    </tbody>
+</table>

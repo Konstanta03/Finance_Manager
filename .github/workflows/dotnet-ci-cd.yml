@@ -2,9 +2,7 @@ name: FinanceManager CI/CD
 
 on:
   push:
-    branches: [ main, develop, "feature/**" ]
   pull_request:
-    branches: [ main, develop ]
 
 jobs:
   build:
@@ -46,7 +44,7 @@ jobs:
         run: dotnet restore FinanceManager2.0.sln
 
       - name: Run tests
-        run: dotnet test FinanceManager2.0.sln --configuration Release --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+        run: dotnet test FinanceManager2.0.sln --configuration Release --no-restore --verbosity normal
 
   publish:
     name: Publish artifact

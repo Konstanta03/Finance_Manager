@@ -1,7 +1,9 @@
 using FinanceManager2._0.Models;
 using FinanceManager2._0.Services;
+using FinanceManager2._0.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using FinanceManager2._0.ViewModels;
 
 namespace FinanceManager.Tests;
 
@@ -20,7 +22,7 @@ public class TransactionServiceTests
         await context.SaveChangesAsync();
 
         var service = new TransactionService(context);
-        var result = await service.BuildQuery("user1", false).ToListAsync();
+        var result = await service.BuildQuery("user1", false, new TransactionFilterViewModel()).ToListAsync();
 
         Assert.Equal(2, result.Count);
         Assert.All(result, t => Assert.Equal("user1", t.UserId));
@@ -39,7 +41,7 @@ public class TransactionServiceTests
         await context.SaveChangesAsync();
 
         var service = new TransactionService(context);
-        var result = await service.BuildQuery("admin", true).ToListAsync();
+        var result = await service.BuildQuery("admin", true, new TransactionFilterViewModel()).ToListAsync();
 
         Assert.Equal(2, result.Count);
     }

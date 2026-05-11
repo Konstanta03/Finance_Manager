@@ -1,0 +1,97 @@
+﻿using Xunit;
+using Microsoft.EntityFrameworkCore;
+using FinanceManager2._0.Controllers;
+using FinanceManager2._0.Models;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace FinanceManager.Tests.Controllers
+{
+    public class RecurringControllerTests
+    {
+        private FinanceDbContext GetDbContext()
+        {
+            var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .UseInMemoryDatabase(System.Guid.NewGuid().ToString())
+                .Options;
+
+            return new FinanceDbContext(options);
+        }
+
+        private RecurringController GetController(FinanceDbContext context, string userId)
+        {
+            var controller = new RecurringController(context);
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            }, "mock"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+
+            return controller;
+        }
+
+        // Тест 1 індекс повертає лише платежі поточного користувача
+        [Fact]
+        public async Task Index_Returns_OnlyUserRecurringPayments()
+        {
+            var context = GetDbContext();
+            context.Categories.Add(new Category { Id = 1, Name = "Food" });
+            context.RecurringPayments.AddRange(
+                new RecurringPayment { Id = 1, Name = "Rent", UserId = "user1", CategoryId = 1 },
+                new RecurringPayment { Id = 2, Name = "Gym", UserId = "user2", CategoryId = 1 }
+            );
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context, "user1");
+            var result = await controller.Index() as ViewResult;
+            var model = result.Model as List<RecurringPayment>;
+
+            Assert.Single(model);
+            Assert.Equal("Rent", model.First().Name);
+        }
+
+        // Тест 2 індекс включає категорію для кожного платежу
+        [Fact]
+        public async Task Index_Includes_Category()
+        {
+            var context = GetDbContext();
+            context.Categories.Add(new Category { Id = 1, Name = "Utilities" });
+            context.RecurringPayments.Add(new RecurringPayment { Id = 1, Name = "Electricity", UserId = "user1", CategoryId = 1 });
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context, "user1");
+            var result = await controller.Index() as ViewResult;
+            var model = result.Model as List<RecurringPayment>;
+
+            Assert.Single(model);
+            Assert.NotNull(model.First().Category);
+            Assert.Equal("Utilities", model.First().Category.Name);
+        }
+
+        // Тест 3 індекс повертає порожній список для користувача без платежів
+        [Fact]
+        public async Task Index_Returns_EmptyList_ForUserWithoutPayments()
+        {
+            var context = GetDbContext();
+            context.Categories.Add(new Category { Id = 1, Name = "Misc" });
+            context.RecurringPayments.Add(new RecurringPayment { Id = 1, Name = "Subscription", UserId = "user2", CategoryId = 1 });
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context, "user1");
+            var result = await controller.Index() as ViewResult;
+            var model = result.Model as List<RecurringPayment>;
+
+            Assert.Empty(model);
+        }
+    }
+}

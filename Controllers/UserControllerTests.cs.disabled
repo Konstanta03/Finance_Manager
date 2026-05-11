@@ -1,0 +1,135 @@
+﻿using Xunit;
+using Moq;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using FinanceManager2._0.Controllers;
+using FinanceManager2._0.Models;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace FinanceManager.Tests.Controllers
+{
+    public class UserControllerTests
+    {
+        private Mock<UserManager<ApplicationUser>> GetUserManagerMock()
+        {
+            var store = new Mock<IUserStore<ApplicationUser>>();
+            return new Mock<UserManager<ApplicationUser>>(
+                store.Object, null, null, null, null, null, null, null, null);
+        }
+
+        private Mock<SignInManager<ApplicationUser>> GetSignInManagerMock(Mock<UserManager<ApplicationUser>> userManagerMock)
+        {
+            var contextAccessor = new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+            var claimsFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            return new Mock<SignInManager<ApplicationUser>>(
+                userManagerMock.Object, contextAccessor.Object, claimsFactory.Object, null, null, null, null);
+        }
+
+        private Mock<RoleManager<IdentityRole>> GetRoleManagerMock()
+        {
+            var store = new Mock<IRoleStore<IdentityRole>>();
+            return new Mock<RoleManager<IdentityRole>>(store.Object, null, null, null, null);
+        }
+
+        [Fact]
+        public async Task Register_PostValidUser_CreatesUserAndRedirects()
+        {
+            var userManagerMock = GetUserManagerMock();
+            var signInManagerMock = GetSignInManagerMock(userManagerMock);
+            var roleManagerMock = GetRoleManagerMock();
+
+            // 🔹 Моки для створення користувача
+            userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), "password"))
+                .ReturnsAsync(IdentityResult.Success);
+            userManagerMock.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), "User"))
+                .ReturnsAsync(IdentityResult.Success);
+            signInManagerMock.Setup(x => x.SignInAsync(It.IsAny<ApplicationUser>(), false, null))
+                .Returns(Task.CompletedTask);
+
+            var controller = new UserController(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object);
+
+            var result = await controller.Register("test@example.com", "password") as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            Assert.Equal("Home", result.ControllerName);
+        }
+
+        [Fact]
+        public async Task Login_ValidCredentials_Redirects()
+        {
+            var userManagerMock = GetUserManagerMock();
+            var signInManagerMock = GetSignInManagerMock(userManagerMock);
+            var roleManagerMock = GetRoleManagerMock();
+
+           
+            signInManagerMock.Setup(x => x.PasswordSignInAsync("test@example.com", "password", false, false))
+                .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
+
+            var controller = new UserController(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object);
+
+            var result = await controller.Login("test@example.com", "password") as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            Assert.Equal("Home", result.ControllerName);
+        }
+
+        [Fact]
+        public async Task Logout_RedirectsToLogin()
+        {
+            var userManagerMock = GetUserManagerMock();
+            var signInManagerMock = GetSignInManagerMock(userManagerMock);
+            var roleManagerMock = GetRoleManagerMock();
+
+            signInManagerMock.Setup(x => x.SignOutAsync()).Returns(Task.CompletedTask);
+
+            var controller = new UserController(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object);
+
+            var result = await controller.Logout() as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Login", result.ActionName);
+        }
+
+        [Fact]
+        public async Task MakeAdmin_ExistingUser_AddsAdminRole()
+        {
+            var userManagerMock = GetUserManagerMock();
+            var signInManagerMock = GetSignInManagerMock(userManagerMock);
+            var roleManagerMock = GetRoleManagerMock();
+
+            var user = new ApplicationUser { Id = "user1" };
+            userManagerMock.Setup(x => x.FindByIdAsync("user1")).ReturnsAsync(user);
+            userManagerMock.Setup(x => x.AddToRoleAsync(user, "Admin")).ReturnsAsync(IdentityResult.Success);
+
+            var controller = new UserController(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object);
+
+            var result = await controller.MakeAdmin("user1") as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+        }
+
+        [Fact]
+        public async Task RemoveAdmin_ExistingUser_RemovesAdminRole()
+        {
+            var userManagerMock = GetUserManagerMock();
+            var signInManagerMock = GetSignInManagerMock(userManagerMock);
+            var roleManagerMock = GetRoleManagerMock();
+
+            var user = new ApplicationUser { Id = "user1" };
+            userManagerMock.Setup(x => x.FindByIdAsync("user1")).ReturnsAsync(user);
+            userManagerMock.Setup(x => x.RemoveFromRoleAsync(user, "Admin")).ReturnsAsync(IdentityResult.Success);
+
+            var controller = new UserController(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object);
+
+            var result = await controller.RemoveAdmin("user1") as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+        }
+    }
+}

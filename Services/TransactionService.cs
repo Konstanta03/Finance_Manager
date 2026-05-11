@@ -1,4 +1,5 @@
 using FinanceManager2._0.Models;
+using FinanceManager2._0.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager2._0.Services
@@ -12,14 +13,44 @@ namespace FinanceManager2._0.Services
             _context = context;
         }
 
-        public IQueryable<Transaction> BuildQuery(string userId, bool isAdmin)
+        public IQueryable<Transaction> BuildQuery(string userId, bool isAdmin, TransactionFilterViewModel filter)
         {
             IQueryable<Transaction> query = _context.Transactions.Include(t => t.Category);
 
             if (!isAdmin)
                 query = query.Where(t => t.UserId == userId);
 
-            return query.OrderByDescending(t => t.Date);
+            if (!string.IsNullOrWhiteSpace(filter.SearchKeyword))
+            {
+                var keyword = filter.SearchKeyword.ToLower();
+                query = query.Where(t => t.Note != null && t.Note.ToLower().Contains(keyword));
+            }
+
+            if (filter.MinAmount.HasValue)
+                query = query.Where(t => t.Amount >= filter.MinAmount.Value);
+
+            if (filter.MaxAmount.HasValue)
+                query = query.Where(t => t.Amount <= filter.MaxAmount.Value);
+
+            if (filter.StartDate.HasValue)
+                query = query.Where(t => t.Date >= DateTime.SpecifyKind(filter.StartDate.Value.Date, DateTimeKind.Utc));
+
+            if (filter.EndDate.HasValue)
+                query = query.Where(t => t.Date <= DateTime.SpecifyKind(filter.EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc));
+
+            if (filter.CategoryId.HasValue && filter.CategoryId.Value != 0)
+                query = query.Where(t => t.CategoryId == filter.CategoryId.Value);
+
+            return (filter.SortBy, filter.SortOrder.ToLower()) switch
+            {
+                ("amount", "asc") => query.OrderBy(t => t.Amount),
+                ("amount", "desc") => query.OrderByDescending(t => t.Amount),
+                ("category", "asc") => query.OrderBy(t => t.Category!.Name),
+                ("category", "desc") => query.OrderByDescending(t => t.Category!.Name),
+                ("date", "asc") => query.OrderBy(t => t.Date),
+                ("date", "desc") => query.OrderByDescending(t => t.Date),
+                _ => query.OrderByDescending(t => t.Date)
+            };
         }
 
         public async Task<Transaction?> GetForEditAsync(int id, string userId, bool isAdmin)

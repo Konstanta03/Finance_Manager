@@ -1,12 +1,10 @@
-# base
+# Final full project
 
-Базова гілка без юзкейсів планових платежів, фільтрації, пошуку і порівняння витрат.
+Ця гілка містить повністю зібраний FinanceManager з усіма юзкейсами:
 
-## CI/CD
-
-У проєкт додано workflow: `.github/workflows/dotnet-ci-cd.yml`.
-Він виконує restore, build, test, publish artifact. Для деплою в Azure додай secrets:
-
-- `AZURE_WEBAPP_NAME`
-- `AZURE_WEBAPP_PUBLISH_PROFILE`
-
+- планувальні платежі;
+- фільтрація транзакцій;
+- пошук транзакцій;
+- порівняння витрат;
+- unit-тести;
+- GitHub Actions CI/CD.

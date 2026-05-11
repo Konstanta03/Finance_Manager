@@ -1,0 +1,83 @@
+﻿using Xunit;
+using Microsoft.EntityFrameworkCore;
+using FinanceManager2._0.Controllers;
+using FinanceManager2._0.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace FinanceManager.Tests.Controllers
+{
+    public class CategoriesControllerTests
+    {
+        private FinanceDbContext GetDbContext()
+        {
+            var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .UseInMemoryDatabase(System.Guid.NewGuid().ToString())
+                .Options;
+
+            return new FinanceDbContext(options);
+        }
+
+        private CategoriesController GetController(FinanceDbContext context)
+        {
+            return new CategoriesController(context);
+        }
+
+        // ===================== INDEX =====================
+        [Fact]
+        public async Task Index_ReturnsAllCategories()
+        {
+            var context = GetDbContext();
+            context.Categories.AddRange(
+                new Category { Name = "Food", IsExpense = true },
+                new Category { Name = "Salary", IsExpense = false }
+            );
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context);
+            var result = await controller.Index() as ViewResult;
+
+            var model = result.Model as List<Category>;
+            Assert.NotNull(model);
+            Assert.Equal(2, model.Count);
+        }
+
+        // ===================== CREATE =====================
+        [Fact]
+        public async Task Create_PostInvalidCategory_ReturnsView()
+        {
+            var context = GetDbContext();
+            var controller = GetController(context);
+            controller.ModelState.AddModelError("Name", "Required");
+
+            var category = new Category { Name = "", IsExpense = true };
+            var result = await controller.Create(category) as ViewResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(category, result.Model);
+            Assert.Empty(context.Categories);
+        }
+
+        // ===================== DELETE =====================
+        [Fact]
+        public async Task DeleteConfirmed_RemovesCategory()
+        {
+            var context = GetDbContext();
+            var category = new Category { Name = "ToDelete", IsExpense = true };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context);
+            var result = await controller.DeleteConfirmed(category.Id) as RedirectToActionResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(nameof(CategoriesController.Index), result.ActionName);
+
+           
+            var exists = await context.Categories.AnyAsync(c => c.Id == category.Id);
+            Assert.False(exists);
+        }
+    }
+}

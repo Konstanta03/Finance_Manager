@@ -1,3 +1,4 @@
+using FinanceManager2._0.Data;
 using FinanceManager2._0.Models;
 using FinanceManager2._0.Services;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +27,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 builder.Services.AddControllersWithViews();
 

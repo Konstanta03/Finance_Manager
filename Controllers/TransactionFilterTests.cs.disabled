@@ -1,0 +1,136 @@
+﻿using Xunit;
+using Microsoft.EntityFrameworkCore;
+using FinanceManager2._0.Controllers;
+using FinanceManager2._0.Models;
+using Microsoft.AspNetCore.Identity;
+using Moq;
+using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System;
+
+namespace FinanceManager.Tests.Controllers
+{
+    public class TransactionFilterTests
+    {
+        private FinanceDbContext GetDbContext()
+        {
+            var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            return new FinanceDbContext(options);
+        }
+
+        private Category CreateCategory(FinanceDbContext context)
+        {
+            var category = new Category { Name = "Test", IsExpense = true };
+            context.Categories.Add(category);
+            context.SaveChanges();
+            return category;
+        }
+
+        private TransactionsController GetController(FinanceDbContext context)
+        {
+            var user = new ApplicationUser { Id = "user1" };
+
+            var userManagerMock = new Mock<UserManager<ApplicationUser>>(
+                Mock.Of<IUserStore<ApplicationUser>>(),
+                null, null, null, null, null, null, null, null);
+
+            userManagerMock
+                .Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
+
+            var controller = new TransactionsController(context, userManagerMock.Object);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "user1")
+                }, "mock"));
+
+            return controller;
+        }
+
+        // Фільтр за ключовим словом у нотатках
+        [Fact]
+        public async Task Index_Filter_ByKeyword()
+        {
+            var context = GetDbContext();
+            var category = CreateCategory(context);
+
+            context.Transactions.AddRange(
+                new Transaction { Note = "coffee", UserId = "user1", Amount = 10, CategoryId = category.Id },
+                new Transaction { Note = "rent", UserId = "user1", Amount = 100, CategoryId = category.Id }
+            );
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context);
+
+            var result = await controller.Index(searchKeyword: "coffee") as ViewResult;
+            var model = result.Model as List<Transaction>;
+
+            Assert.Single(model);
+            Assert.Equal("coffee", model.First().Note);
+        }
+
+        // Фільтр за діапазоном сум
+        [Fact]
+        public async Task Index_Filter_ByAmountRange()
+        {
+            var context = GetDbContext();
+            var category = CreateCategory(context);
+
+            context.Transactions.AddRange(
+                new Transaction { Amount = 10, UserId = "user1", CategoryId = category.Id },
+                new Transaction { Amount = 50, UserId = "user1", CategoryId = category.Id },
+                new Transaction { Amount = 100, UserId = "user1", CategoryId = category.Id }
+            );
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context);
+
+            var result = await controller.Index(minAmount: 20, maxAmount: 80) as ViewResult;
+            var model = result.Model as List<Transaction>;
+
+            Assert.Single(model);
+            Assert.Equal(50, model.First().Amount);
+        }
+
+        // Фільтр за діапазоном дат
+        [Fact]
+        public async Task Index_Filter_ByDateRange()
+        {
+            var context = GetDbContext();
+            var category = CreateCategory(context);
+
+            context.Transactions.AddRange(
+                new Transaction { Date = new DateTime(2024, 1, 1), UserId = "user1", CategoryId = category.Id },
+                new Transaction { Date = new DateTime(2024, 2, 1), UserId = "user1", CategoryId = category.Id },
+                new Transaction { Date = new DateTime(2024, 3, 1), UserId = "user1", CategoryId = category.Id }
+            );
+            await context.SaveChangesAsync();
+
+            var controller = GetController(context);
+
+            var result = await controller.Index(
+                startDate: new DateTime(2024, 2, 1),
+                endDate: new DateTime(2024, 2, 28)
+            ) as ViewResult;
+
+            var model = result.Model as List<Transaction>;
+
+            Assert.Single(model);
+            Assert.Equal(2, model.First().Date.Month);
+        }
+    }
+}
