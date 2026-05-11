@@ -3,6 +3,7 @@
 <h2>💰 Транзакції</h2>
 
 <a asp-action="Create" class="btn btn-success mb-3">➕ Додати транзакцію</a>
+<a asp-controller="Recurring" asp-action="Index" class="btn btn-info mb-3">🔄 Планові платежі</a>
 
 <table class="table table-striped">
     <thead>
@@ -40,3 +41,14 @@
         }
     </tbody>
 </table>
+
+@if (ViewBag.RecurringPayments != null && ViewBag.RecurringPayments.Count > 0)
+{
+    <h4>🔄 Активні планові платежі</h4>
+    <ul>
+        @foreach (var r in ViewBag.RecurringPayments)
+        {
+            <li>@r.Name: @r.Amount (@r.Category?.Name) - Початок: @r.StartDate.ToLocalTime().ToShortDateString()</li>
+        }
+    </ul>
+}

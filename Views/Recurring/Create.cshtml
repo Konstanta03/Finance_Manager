@@ -1,0 +1,51 @@
+@model FinanceManager2._0.Models.RecurringPayment
+@{
+    ViewData["Title"] = "Планувальник платежів";
+}
+<h2>🗓 Планувальник платежів</h2>
+<p class="text-muted">Додайте регулярну транзакцію: оренда, підписка, комунальні тощо.</p>
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+<form asp-controller="Recurring" asp-action="Create" method="post" class="card-custom">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Назва платежу</label>
+        <input asp-for="Name" class="form-control" placeholder="Наприклад: Netflix, оренда" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">Сума</label>
+        <input asp-for="Amount" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Категорія</label>
+        <select asp-for="CategoryId" class="form-select">
+            <option value="">-- Оберіть категорію --</option>
+            @foreach (var cat in ViewBag.Categories)
+            {
+                <option value="@cat.Id">@cat.Name</option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="StartDate" class="form-label">Дата початку</label>
+        <input asp-for="StartDate" type="date" class="form-control" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Frequency" class="form-label">Періодичність</label>
+        <select asp-for="Frequency" class="form-select">
+            <option value="Weekly">Щотижня</option>
+            <option value="Monthly">Щомісяця</option>
+            <option value="Yearly">Щороку</option>
+        </select>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label">Активний платіж</label>
+    </div>
+    <button type="submit" class="btn btn-success">💾 Зберегти</button>
+    <a asp-controller="Recurring" asp-action="Index" class="btn btn-secondary">⬅ Назад</a>
+</form>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }
