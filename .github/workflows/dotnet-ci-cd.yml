@@ -72,7 +72,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: finance-manager-app
+          name: finance-manager-${{ github.ref_name }}
           path: ./publish
 
   deploy:
@@ -87,7 +87,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: finance-manager-app
+          name: finance-manager-${{ github.ref_name }}
           path: ./publish
 
       - name: Skip deploy when Azure secrets are missing
