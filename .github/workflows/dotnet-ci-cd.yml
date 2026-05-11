@@ -2,9 +2,7 @@ name: FinanceManager CI/CD
 
 on:
   push:
-    branches: [ main, develop, "feature/**" ]
   pull_request:
-    branches: [ main, develop ]
 
 jobs:
   build:
@@ -72,7 +70,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: finance-manager-${{ github.ref_name }}
+          name: finance-manager-app
           path: ./publish
 
   deploy:
@@ -87,7 +85,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: finance-manager-${{ github.ref_name }}
+          name: finance-manager-app
           path: ./publish
 
       - name: Skip deploy when Azure secrets are missing

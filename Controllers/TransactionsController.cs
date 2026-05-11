@@ -31,13 +31,15 @@ namespace FinanceManager2._0.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "User");
 
-            var transactionsQuery = _transactionService.BuildQuery(user.Id, User.IsInRole("Admin"));
-            ViewBag.RecurringPayments = await _context.RecurringPayments
-                .Include(r => r.Category)
-                .Where(r => r.UserId == user.Id && r.IsActive)
-                .OrderBy(r => r.StartDate)
-                .ToListAsync();
+            var transactionsQuery = _transactionService.BuildQuery(user.Id, User.IsInRole("Admin"), filter);
 
+            ViewBag.MinAmount = filter.MinAmount;
+            ViewBag.MaxAmount = filter.MaxAmount;
+            ViewBag.StartDate = filter.StartDate?.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = filter.EndDate?.ToString("yyyy-MM-dd");
+            ViewBag.SelectedCategoryId = filter.CategoryId;
+
+            LoadDropdowns(filter.CategoryId);
             return View(await transactionsQuery.ToListAsync());
         }
 
