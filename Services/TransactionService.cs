@@ -1,4 +1,5 @@
 using FinanceManager2._0.Models;
+using FinanceManager2._0.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager2._0.Services
@@ -12,12 +13,20 @@ namespace FinanceManager2._0.Services
             _context = context;
         }
 
-        public IQueryable<Transaction> BuildQuery(string userId, bool isAdmin)
+        public IQueryable<Transaction> BuildQuery(string userId, bool isAdmin, TransactionFilterViewModel filter)
         {
             IQueryable<Transaction> query = _context.Transactions.Include(t => t.Category);
 
             if (!isAdmin)
                 query = query.Where(t => t.UserId == userId);
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchKeyword))
+            {
+                var keyword = filter.SearchKeyword.ToLower();
+                query = query.Where(t =>
+                    (t.Note != null && t.Note.ToLower().Contains(keyword)) ||
+                    (t.Category != null && t.Category.Name.ToLower().Contains(keyword)));
+            }
 
             return query.OrderByDescending(t => t.Date);
         }

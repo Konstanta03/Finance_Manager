@@ -1,5 +1,6 @@
 using FinanceManager2._0.Models;
 using FinanceManager2._0.Services;
+using FinanceManager2._0.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +26,14 @@ namespace FinanceManager2._0.Controllers
             _transactionService = transactionService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(TransactionFilterViewModel filter)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "User");
 
-            var transactionsQuery = _transactionService.BuildQuery(user.Id, User.IsInRole("Admin"));
+            var transactionsQuery = _transactionService.BuildQuery(user.Id, User.IsInRole("Admin"), filter);
+
+            ViewBag.SearchKeyword = filter.SearchKeyword;
             return View(await transactionsQuery.ToListAsync());
         }
 
